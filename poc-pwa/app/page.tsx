@@ -14,15 +14,16 @@ export default function Home() {
         .then((registration) => console.log('scope is: ', registration.scope));
     }
     askPermission();
-  }, []);
-
-  useEffect(() => {
     socket.on('notification', (data) => {
       console.log('notification', data);
-
       checkPermission(data);
     });
-  }, [socket]);
+    return () => {
+      socket.off('notification');
+    }
+  }, []);
+
+
 
   const askPermission = async () => {
     const permission = await Notification.requestPermission();
@@ -31,7 +32,6 @@ export default function Home() {
 
   const checkPermission = async (notification_text: string) => {
     const permissions = await Notification.requestPermission();
-    console.log('checkPermission', notification_text, permissions);
     if (permissions === 'granted') {
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification(notification_text, {
